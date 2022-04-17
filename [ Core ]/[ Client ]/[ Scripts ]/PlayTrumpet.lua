@@ -1,43 +1,37 @@
 --------------------------------------------------------------------------------
 ---------------------------------- DokusCore -----------------------------------
 --------------------------------------------------------------------------------
--- Display a scene status on your character that sticks until you remove it.
+-- Play the trumpet like a boss!
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-local Array = {}
+local IsPlaying = false
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-RegisterServerEvent('DokusCore:ScriptBundle:Status:Set')
-AddEventHandler('DokusCore:ScriptBundle:Status:Set', function(Data)
-  local Source = source
-  local Text = tostring(Data.Result)
-  local Stat = { Text = Text, ServerID = Source }
-  Array[#Array + 1] = Stat
-  TriggerClientEvent('DokusCore:ScriptBundle:Status:Activate', -1, Array)
+RegisterNetEvent('DokuCore:ScriptBundle:Trumpet:Play', function(Data)
+  IsPlaying = true
+  local PedID  = PedID()
+  local Coords = GetCoords(PedID)
+  local Hash   = GetHashKey(Data[1])
+  TaskStartScenarioInPlace(PedID, Hash, -1, true, false, false, false)
+  TriggerEvent('DokuCore:ScriptBundle:Trumpet:WaitToStop', PedID)
+  Notify("You can stop playing by pressing Backspace - Spacebar or X")
 end)
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-RegisterServerEvent('DokusCore:ScriptBundle:Status:Delete')
-AddEventHandler('DokusCore:ScriptBundle:Status:Delete', function()
-  local Source = source
-  if (Array[1] ~= nil) then
-    for k,v in pairs(Array) do
-      if (Array[k].ServerID == Source) then
-        table.remove(Array, k)
-        break
-      end
+RegisterNetEvent('DokuCore:ScriptBundle:Trumpet:WaitToStop', function(PedID)
+  while IsPlaying do Wait(1)
+    local C1 = IsControlJustPressed(0, _Keys['BACKSPACE'])
+    local C2 = IsControlJustPressed(0, _Keys['SPACEBAR'])
+    local C3 = IsControlJustPressed(0, _Keys['X'])
+    if ((C1) or (C2) or (C3)) then
+			ClearPedTasks(PedID) Wait(1500)
+      ClearPedTasksImmediately(PedID)
+      IsPlaying = false
     end
   end
-  TriggerClientEvent('DokusCore:ScriptBundle:Status:Activate', -1, Array)
 end)
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-
-
-
-
-
-
 
 
 
